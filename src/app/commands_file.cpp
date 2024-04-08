@@ -484,13 +484,15 @@ CommandCloseCurrentDocument::CommandCloseCurrentDocument(IAppContext* context)
     this->setAction(action);
 
     QObject::connect(
-                context, &IAppContext::currentDocumentChanged,
-                this, &CommandCloseCurrentDocument::updateActionText
+        context, &IAppContext::currentDocumentChanged,
+        this, &CommandCloseCurrentDocument::updateActionText
     );
-    this->app()->signalDocumentNameChanged.connectSlot([=](const DocumentPtr& doc) {
-        if (this->currentDocument() == doc->identifier())
-            this->updateActionText(this->currentDocument());
-    });
+    m_connDocumentNameChanged = this->app()->signalDocumentNameChanged.connectSlot(
+        [=](const DocumentPtr& doc) {
+            if (this->currentDocument() == doc->identifier())
+                this->updateActionText(this->currentDocument());
+        }
+    );
 
     this->updateActionText(-1);
 }
@@ -547,13 +549,15 @@ CommandCloseAllDocumentsExceptCurrent::CommandCloseAllDocumentsExceptCurrent(IAp
     this->setAction(action);
 
     QObject::connect(
-                context, &IAppContext::currentDocumentChanged,
-                this, &CommandCloseAllDocumentsExceptCurrent::updateActionText
+        context, &IAppContext::currentDocumentChanged,
+        this, &CommandCloseAllDocumentsExceptCurrent::updateActionText
     );
-    this->app()->signalDocumentNameChanged.connectSlot([=](const DocumentPtr& doc) {
-        if (this->currentDocument() == doc->identifier())
-            this->updateActionText(this->currentDocument());
-    });
+    m_connDocumentNameChanged = this->app()->signalDocumentNameChanged.connectSlot(
+        [=](const DocumentPtr& doc) {
+            if (this->currentDocument() == doc->identifier())
+                this->updateActionText(this->currentDocument());
+        }
+    );
 
     this->updateActionText(-1);
 }

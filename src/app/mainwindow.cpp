@@ -123,6 +123,7 @@ void MainWindow::createCommands()
     this->addCommand<CommandSaveViewImage>();
     this->addCommand<CommandInspectXde>();
     this->addCommand<CommandEditOptions>();
+    this->addCommand<CommandExecScript>();
 
     // "Window" commands
     this->addCommand<CommandLeftSidebarWidgetToggle>();
@@ -179,6 +180,8 @@ void MainWindow::createMenus()
         auto menu = m_ui->menu_Tools;
         fnAddAction(menu, CommandSaveViewImage::Name);
         fnAddAction(menu, CommandInspectXde::Name);
+        menu->addSeparator();
+        fnAddAction(menu, CommandExecScript::Name);
         menu->addSeparator();
         fnAddAction(menu, CommandEditOptions::Name);
     }

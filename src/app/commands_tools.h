@@ -8,6 +8,8 @@
 
 #include "commands_api.h"
 
+class QJSEngine;
+
 namespace Mayo {
 
 class CommandSaveViewImage : public Command {
@@ -34,6 +36,17 @@ public:
     void execute() override;
 
     static constexpr std::string_view Name = "edit-options";
+};
+
+class CommandExecScript : public Command {
+public:
+    CommandExecScript(IAppContext* context);
+    void execute() override;
+
+    static constexpr std::string_view Name = "exec-script";
+
+private:
+    QJSEngine* m_jsEngine = nullptr;
 };
 
 } // namespace Mayo

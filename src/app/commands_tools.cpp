@@ -19,6 +19,13 @@
 
 #include <QtWidgets/QWidget>
 
+#include "../qtscripting/js_application.h"
+#include "../qtscripting/js_document.h"
+#include <QtCore/QFile>
+#include <QtCore/QtDebug>
+#include <QtQml/QJSEngine>
+#include <QtWidgets/QFileDialog>
+
 namespace Mayo {
 
 CommandSaveViewImage::CommandSaveViewImage(IAppContext* context)
@@ -95,6 +102,45 @@ void CommandEditOptions::execute()
 {
     auto dlg = new DialogOptions(AppModule::get()->settings(), this->widgetMain());
     QtWidgetsUtils::asyncDialogExec(dlg);
+}
+
+CommandExecScript::CommandExecScript(IAppContext* context)
+    : Command(context)
+{
+    auto action = new QAction(this);
+    action->setText(Command::tr("Execute Script..."));
+    //action->setToolTip(Command::tr("Options"));
+    this->setAction(action);
+}
+
+void CommandExecScript::execute()
+{
+    auto strFilePath = QFileDialog::getOpenFileName(
+        this->widgetMain(),
+        Command::tr("Choose JavaScript file"),
+        QString(/*dir*/),
+        Command::tr("Script files(*.js)")
+    );
+    if (strFilePath.isEmpty())
+        return;
+
+    if (!m_jsEngine) {
+        m_jsEngine = new QJSEngine(this);
+        m_jsEngine->installExtensions(QJSEngine::ConsoleExtension);
+        auto jsApp = new JsApplication(this->context()->guiApp()->application(), m_jsEngine);
+        QJSValue scriptApp = m_jsEngine->newQObject(jsApp);
+        m_jsEngine->globalObject().setProperty("application", scriptApp);
+    }
+
+    QFile jsFile(strFilePath);
+    if (jsFile.open(QIODevice::ReadOnly)) {
+        auto jsVal = m_jsEngine->evaluate(jsFile.readAll());
+        if (jsVal.isError()) {
+            qCritical() << "Error at line"
+                        << jsVal.property("lineNumber").toInt()
+                        << ":" << jsVal.toString();
+        }
+    }
 }
 
 } // namespace Mayo {
