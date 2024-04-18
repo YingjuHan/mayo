@@ -39,12 +39,13 @@ signals:
     void documentCountChanged();
 
 private:
+    void onDocumentAdded(const DocumentPtr& doc);
     void onDocumentAboutToClose(const DocumentPtr& doc);
 
     ApplicationPtr m_app;
     std::vector<JsDocument*> m_vecJsDoc;
     std::unordered_map<Document::Identifier, JsDocument*> m_mapIdToJsDocument;
-    ScopedSignalConnection m_conn;
+    ScopedSignalConnections<> m_sigConns;
 };
 
 } // namespace Mayo

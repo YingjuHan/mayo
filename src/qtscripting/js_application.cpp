@@ -20,12 +20,12 @@ JsApplication::JsApplication(const ApplicationPtr& app, QObject* parent)
       m_app(app)
 {
     if (app) {
-        m_conn = app->signalDocumentAboutToClose.connectSlot(&JsApplication::onDocumentAboutToClose, this);
-        for (Application::DocumentIterator itDoc(app); itDoc.hasNext(); itDoc.next()) {
-            auto jsDoc = new JsDocument(itDoc.current(), this);
-            m_vecJsDoc.push_back(jsDoc);
-            m_mapIdToJsDocument.insert({ itDoc.current()->identifier(), jsDoc });
-        }
+        m_sigConns
+            << app->signalDocumentAdded.connectSlot(&JsApplication::onDocumentAdded, this)
+            << app->signalDocumentAboutToClose.connectSlot(&JsApplication::onDocumentAboutToClose, this)
+        ;
+        for (Application::DocumentIterator itDoc(app); itDoc.hasNext(); itDoc.next())
+            this->onDocumentAdded(itDoc.current());
     }
 }
 
@@ -84,6 +84,13 @@ void JsApplication::closeDocument(QObject* doc)
     auto jsDoc = qobject_cast<JsDocument*>(doc);
     if (m_app && jsDoc)
         m_app->closeDocument(jsDoc->baseDocument());
+}
+
+void JsApplication::onDocumentAdded(const DocumentPtr& doc)
+{
+    auto jsDoc = new JsDocument(doc, this);
+    m_vecJsDoc.push_back(jsDoc);
+    m_mapIdToJsDocument.insert({ doc->identifier(), jsDoc });
 }
 
 void JsApplication::onDocumentAboutToClose(const DocumentPtr& doc)
